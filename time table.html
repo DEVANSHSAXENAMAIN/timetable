@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>🌸 RadhaKrishna OP Study Planner 🌸</title>
+
+<!-- Chart.js for charts -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<style>
+  body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Poppins', sans-serif;
+    overflow-x: hidden;
+    color: white;
+    position: relative;
+    background: #000;
+  }
+  /* Background Slideshow */
+  body::before {
+    content: "";
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    z-index: -2;
+    animation: slideshow 30s infinite alternate;
+  }
+ 
+  @keyframes slideshow {
+    0%   { background-image: url('7f614f6c347f8388fb8619bafadd6266.png'); }
+    33%  { background-image: url('7f614f6c347f8388fb8619bafadd6266.png'); }
+    66%  { background-image: url('7f614f6c347f8388fb8619bafadd6266.png'); }
+    100% { background-image: url('7f614f6c347f8388fb8619bafadd6266.png'); }
+  }
+
+  /* Floating Stars */
+  .star {
+    position: fixed;
+    width: 4px;
+    height: 4px;
+    background: white;
+    border-radius: 50%;
+    opacity: 0.8;
+    animation: float 10s linear infinite;
+  }
+  @keyframes float {
+    0% { transform: translateY(100vh); opacity: 0; }
+    10% { opacity: 1; }
+    100% { transform: translateY(-10vh); opacity: 0; }
+  }
+
+  h1 {
+    text-align: center;
+    margin-top: 20px;
+    text-shadow: 2px 2px 10px #ff69b4;
+    animation: glow 3s infinite alternate;
+  }
+  @keyframes glow {
+    from { text-shadow: 0 0 10px #ff69b4, 0 0 20px #ffd700; }
+    to { text-shadow: 0 0 20px #ff1493, 0 0 40px #ffec8b; }
+  }
+
+  .quote {
+    text-align: center;
+    font-size: 20px;
+    margin-top: 5px;
+    font-style: italic;
+    text-shadow: 1px 1px 8px #000;
+  }
+
+  /* Progress Bar */
+  .progress-container {
+    width: 90%;
+    background: rgba(255,255,255,0.2);
+    border-radius: 30px;
+    margin: 20px auto;
+    overflow: hidden;
+  }
+  .progress-bar {
+    height: 25px;
+    width: 0;
+    background: linear-gradient(90deg, red, yellow, green);
+    transition: width 0.5s ease-in-out;
+  }
+  .stats {
+    text-align: center;
+    font-size: 18px;
+    margin: 10px 0;
+    text-shadow: 1px 1px 5px #000;
+  }
+
+  /* Chart Section */
+  .chart-section {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+    margin: 20px auto;
+    width: 95%;
+    flex-wrap: wrap;
+  }
+  .chart-box {
+    flex: 1;
+    padding: 10px;
+    max-width: 50%;
+  }
+  canvas {
+    width: 100% !important;
+    height: auto !important;
+    background: rgba(0,0,0,0.5); /* semi-transparent dark background */
+    border-radius: 15px;
+    backdrop-filter: blur(8px); /* glass effect */
+  }
+
+  /* Table */
+  table {
+    width: 95%;
+    margin: 20px auto;
+    border-collapse: collapse;
+    background: rgba(255,255,255,0.85);
+    color: #000;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  th, td {
+    border: 1px solid #ccc;
+    padding: 6px;
+    text-align: center;
+  }
+  th {
+    background: linear-gradient(45deg,#ff69b4,#ff1493);
+    color: white;
+    position: sticky;
+    top: 0;
+  }
+  tr:hover { background: rgba(255, 255, 200, 0.8) !important; }
+  tr:nth-child(even) { background: rgba(255,240,245,0.8); }
+  tr:nth-child(odd) { background: rgba(255,255,255,0.8); }
+  td[contenteditable="true"] { background: #ffffe0; cursor: text; }
+  input[type="checkbox"] { transform: scale(1.2); cursor: pointer; }
+
+  .footer {
+    text-align: center;
+    margin: 30px 0;
+    text-shadow: 1px 1px 5px #000;
+  }
+</style>
+</head>
+<body>
+
+<h1>🌸 RadhaKrishna 90-Day Study Planner 🌸</h1>
+<div class="quote" id="dailyQuote"></div>
+
+<div class="progress-container">
+  <div class="progress-bar" id="progressBar"></div>
+</div>
+
+<div class="stats">
+  ✅ Completed: <span id="completed">0</span> / 180 (Topics) | 🌈 Success Rate: <span id="successRate">0%</span><br>
+  ⭐ Current Streak: <span id="currentStreak">0</span> days | 🏆 Longest Streak: <span id="longestStreak">0</span> days
+</div>
+
+<!-- Charts in side-by-side layout -->
+<div class="chart-section">
+  <div class="chart-box"><canvas id="weeklyChart"></canvas></div>
+  <div class="chart-box"><canvas id="subjectChart"></canvas></div>
+</div>
+
+<table id="timetable">
+  <thead>
+    <tr>
+      <th>Day</th>
+      <th>Subject 1</th>
+      <th>Topic 1</th>
+      <th>Done?</th>
+      <th>Subject 2</th>
+      <th>Topic 2</th>
+      <th>Done?</th>
+    </tr>
+  </thead>
+  <tbody></tbody>
+</table>
+
+<div class="footer">✨ With Love & Blessings from Radha Rani ✨</div>
+
+<audio id="tickSound" src="https://www.soundjay.com/buttons/sounds/button-3.mp3"></audio>
+<audio autoplay loop>
+  <source src="https://www.bensound.com/bensound-music/bensound-betterdays.mp3" type="audio/mpeg">
+</audio>
+
+<script>
+// Floating stars
+for(let i=0;i<40;i++){
+  const star=document.createElement('div');
+  star.classList.add('star');
+  star.style.left = Math.random()*100+'vw';
+  star.style.animationDuration = (5+Math.random()*10)+'s';
+  star.style.opacity = Math.random();
+  star.style.width = star.style.height = Math.random()*3+2+'px';
+  document.body.appendChild(star);
+}
+
+// Quotes
+const quotes = [
+  "🌼 Jo mann Radhe naam me lage, uska gyaan aur safalta dono badhe.",
+  "🎶 Study ko leela banao, revision ko bansuri ki madhur dhun.",
+  "💖 Radha Krishna ki kripa se mehnat rang laati hai.",
+  "🌸 Shanti aur prem se padhoge to yaadash apne aap badhegi."
+];
+document.getElementById("dailyQuote").textContent = quotes[Math.floor(Math.random()*quotes.length)];
+
+// Table + Logic
+const tbody = document.querySelector("#timetable tbody");
+const progressBar = document.getElementById("progressBar");
+const completedSpan = document.getElementById("completed");
+const successRateSpan = document.getElementById("successRate");
+const tickSound = document.getElementById("tickSound");
+
+const subjects1 = ["JAVA","Discrete Maths","Operating System","Computer Org.","Numerical Analysis"];
+const subjects2 = ["Numerical Analysis","JAVA","CO","DM","OS"];
+const topics = ["Revision / Practice","MCQs","Problem Solving","Project Work","Graphs & Logic"];
+
+let savedProgress = JSON.parse(localStorage.getItem("studyProgressOP") || "[]");
+let currentStreak = 0, longestStreak = 0;
+
+for(let day=1; day<=90; day++){
+  const tr = document.createElement("tr");
+  tr.innerHTML = `
+    <td>${day}</td>
+    <td contenteditable="true">${subjects1[day % subjects1.length]}</td>
+    <td contenteditable="true">${topics[day % topics.length]}</td>
+    <td><input type="checkbox" class="check" data-day="${day}-1"></td>
+    <td contenteditable="true">${subjects2[day % subjects2.length]}</td>
+    <td contenteditable="true">${topics[(day+2) % topics.length]}</td>
+    <td><input type="checkbox" class="check" data-day="${day}-2"></td>
+  `;
+  tbody.appendChild(tr);
+}
+
+// Restore saved
+document.querySelectorAll(".check").forEach(c=>{
+  if(savedProgress.includes(c.dataset.day)) c.checked=true;
+  c.addEventListener("change", ()=>{ updateProgress(); tickSound.play(); });
+});
+
+function updateProgress() {
+  const checks = document.querySelectorAll(".check");
+  const done = document.querySelectorAll(".check:checked").length;
+  const total = checks.length;
+  const percent = Math.round((done/total)*100);
+  progressBar.style.width = percent+"%";
+  completedSpan.textContent = done;
+  successRateSpan.textContent = percent+"%";
+
+  // Save progress
+  let progress=[];
+  checks.forEach(c=>{ if(c.checked) progress.push(c.dataset.day); });
+  localStorage.setItem("studyProgressOP", JSON.stringify(progress));
+
+  // Streak
+  currentStreak = calcStreak();
+  if(currentStreak>longestStreak) longestStreak=currentStreak;
+  document.getElementById("currentStreak").textContent=currentStreak;
+  document.getElementById("longestStreak").textContent=longestStreak;
+
+  // Charts update
+  updateCharts(done,total);
+}
+
+function calcStreak(){
+  let streak=0;
+  let max=0;
+  for(let d=1;d<=90;d++){
+    const c1 = document.querySelector(`.check[data-day="${d}-1"]`).checked;
+    const c2 = document.querySelector(`.check[data-day="${d}-2"]`).checked;
+    if(c1 && c2){ streak++; if(streak>max) max=streak; } else { streak=0; }
+  }
+  return streak;
+}
+
+// Chart defaults for white text
+Chart.defaults.color = "#fff";
+Chart.defaults.font.size = 14;
+
+// Weekly Chart
+const weeklyChartCtx = document.getElementById('weeklyChart').getContext('2d');
+const weeklyChart = new Chart(weeklyChartCtx,{
+  type:'bar',
+  data:{ labels:["Week1","Week2","Week3","Week4","Week5","Week6","Week7","Week8","Week9","Week10","Week11","Week12","Week13"], 
+    datasets:[{label:"Completed Days",data:Array(13).fill(0),backgroundColor:'#ff69b4'}]},
+  options:{
+    responsive:true,
+    plugins:{legend:{labels:{color:'#fff',font:{weight:'bold'}}}},
+    scales:{
+      x:{ticks:{color:'#fff'},grid:{color:'rgba(255,255,255,0.2)'}},
+      y:{ticks:{color:'#fff'},grid:{color:'rgba(255,255,255,0.2)'}}
+    }
+  }
+});
+
+// Subject Pie Chart
+const subjectChartCtx = document.getElementById('subjectChart').getContext('2d');
+const subjectChart = new Chart(subjectChartCtx,{
+  type:'pie',
+  data:{ labels:["JAVA","DM","OS","CO","NA"],datasets:[{data:[0,0,0,0,0],backgroundColor:["#FFD700","#FFA07A","#90EE90","#FFB6C1","#87CEEB"]}] },
+  options:{
+    plugins:{legend:{labels:{color:'#fff',font:{weight:'bold'}}}}
+  }
+});
+
+function updateCharts(done,total){
+  // Weekly chart
+  let weekData = Array(13).fill(0);
+  for(let d=1;d<=90;d++){
+    const c1 = document.querySelector(`.check[data-day="${d}-1"]`).checked;
+    const c2 = document.querySelector(`.check[data-day="${d}-2"]`).checked;
+    const weekIndex = Math.floor((d-1)/7);
+    if(c1 && c2) weekData[weekIndex]++;
+  }
+  weeklyChart.data.datasets[0].data = weekData;
+  weeklyChart.update();
+
+  // Subject pie chart
+  let subjCount = [0,0,0,0,0];
+  for(let d=1;d<=90;d++){
+    if(document.querySelector(`.check[data-day="${d}-1"]`).checked) subjCount[d%5]++;
+    if(document.querySelector(`.check[data-day="${d}-2"]`).checked) subjCount[d%5]++;
+  }
+  subjectChart.data.datasets[0].data=subjCount;
+  subjectChart.update();
+}
+
+updateProgress();
+</script>
+
+</body>
+</html>
